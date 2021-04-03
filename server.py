@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request
 from http import HTTPStatus
 app = Flask(__name__)
@@ -14,12 +15,18 @@ def error_response(error_string=None, status_code=None):
 @app.route('/languages', methods=['POST'])
 def create_language():
     existing_language = ['Marathi']
-    json_data = request.json
-    lang_name = json_data['lang_name']
-    print(lang_name)
+    try:
+        if request.headers['Content-type'] != 'application/json':
+            return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+        lang_input = json.loads(request.data)
+        lang_id, lang_name = lang_input['lang_id'], lang_input['lang_name']
+        print(type(lang_name))
+    except (ValueError, KeyError, TypeError) as json_err:
+        return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+    if lang_name == '' or type(lang_name) != str:
+        return error_response('Invalid input', HTTPStatus.UNPROCESSABLE_ENTITY)
     if lang_name in existing_language:
         return error_response('Language already exists', HTTPStatus.CONFLICT)
-    lang_id = json_data['lang_id']
     return success_response(HTTPStatus.CREATED, lang_id)
    
 
