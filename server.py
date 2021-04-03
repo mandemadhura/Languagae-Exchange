@@ -21,7 +21,6 @@ def create_language():
             return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
         lang_input = json.loads(request.data)
         lang_id, lang_name = lang_input['lang_id'], lang_input['lang_name']
-        print(type(lang_name))
     except (ValueError, KeyError, TypeError) as json_err:
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or type(lang_name) != str:
@@ -33,7 +32,25 @@ def create_language():
 @app.route('/languages/<lang_id>', methods=['DELETE'])
 def delete_language(lang_id=None):
     if lang_id not in existing_language.keys(): 
-        return error_response('Language does not exist', HTTPStatus.NOT_FOUND) 
+        return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+    # TODO: Handle Language already in use 
+    return success_response(HTTPStatus.OK, lang_id)
+
+@app.route('/languages/<lang_id>', methods=['PUT'])
+def update_language(lang_id):
+    try:
+        if request.headers['Content-type'] != 'application/json':
+            return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+        lang_input = json.loads(request.data)
+        lang_name = lang_input['lang_name']
+    except (ValueError, KeyError, TypeError) as json_err:
+        return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+    if lang_name == '' or type(lang_name) != str:
+        return error_response('Invalid input', HTTPStatus.UNPROCESSABLE_ENTITY)
+    if lang_id not in existing_language.keys(): 
+        return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+    if lang_name in existing_language.values():
+        return error_response('Language name must be unique', HTTPStatus.CONFLICT)
     return success_response(HTTPStatus.OK, lang_id)
     
     
