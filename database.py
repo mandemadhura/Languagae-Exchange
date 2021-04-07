@@ -1,22 +1,27 @@
-@abstractclass
-class Database:
+import abc
 
-    def __init__(host, port, username, password):
-        pass
+
+class Database(metaclass=abc.ABCMeta):
+
+    def __init__(self, host, port, username, password):
+        self._host = host
+        self._port = port
+        self._username = username
+        self._password = password
 
     def connect():
         # connect to db
         # returns a connection
-	pass
-        	   
+        pass
+
     def close():
         # close the connection
-	pass
+        pass
 
     def is_open():
         # returns true if connection
-	# is open
-	pass
+	    # is open
+        pass
 
     def get_host():
         return self._host
@@ -46,6 +51,6 @@ class Database:
 
     def update_language(self, lang_object):
         '''Updates an existing language'''
-	pass
+        pass
 
 
