@@ -3,6 +3,7 @@ import psycopg2
 from database import Database
 from models.language import Language
 
+
 class PostgresDB(Database):
     '''Connects and communicates to postgres database'''
 

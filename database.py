@@ -4,6 +4,7 @@ import abc
 class Database(metaclass=abc.ABCMeta):
 
     def __init__(self, host, port, username, password):
+        '''Init method'''
         self._host = host
         self._port = port
         self._username = username

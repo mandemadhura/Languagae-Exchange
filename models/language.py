@@ -2,6 +2,7 @@ class Language:
     '''Represenst a single language'''
 
     def __init__(self, lang_name, lang_id=None):
+        '''Init method'''
         self._lang_id = lang_id
         self._lang_name = lang_name
 
