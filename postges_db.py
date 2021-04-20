@@ -2,6 +2,7 @@ import psycopg2
 
 from database import Database
 from models.language import Language
+from conf.log.lang_exch_logging import logger
 
 
 class PostgresDB(Database):
@@ -23,6 +24,7 @@ class PostgresDB(Database):
 
     def add_language(self, lang_obj):
         '''A new table entry will be added for a new language'''
+
         lang = lang_obj.get_language_name()
 
         # Use in-memory cursor object for fast read write access
@@ -41,6 +43,7 @@ class PostgresDB(Database):
         # in-memory cursor buffer
         self.pg_conn_obj.commit()
         cursor_obj.close()
+        logger.info(f'New language:{lang} successfully added in the Database')
 
     def update_language(self, lang_obj, new_lang):
         '''An entry will be updated for the existing language'''
@@ -56,6 +59,7 @@ class PostgresDB(Database):
 
         self.pg_conn_obj.commit()
         cursor_obj.close()
+        logger.info(f'language successfully updated with {new_lang} in the Database')
 
     def delete_language(self, lang_obj):
         '''An entry for the requested language will be deleted'''
@@ -71,6 +75,7 @@ class PostgresDB(Database):
 
         self.pg_conn_obj.commit()
         cursor_obj.close()
+        logger.info(f'language successfully deleted from the Database')
 
     def get_language(self, lang_id):
         '''Returns a language record for a given id'''
@@ -86,6 +91,7 @@ class PostgresDB(Database):
         row = cursor_obj.fetchone()
         while row:
             print(row)
+            logger.info(f'Corresponding language for a language: {row}')
             row = cursor_obj.fetchone()
 
         cursor_obj.close()
@@ -101,6 +107,7 @@ class PostgresDB(Database):
 
         row = cursor_obj.fetchone()
         while row:
+            logger.info(f'Corresponding language for all language get query: {row}')
             print(row)
             row = cursor_obj.fetchone()
 
