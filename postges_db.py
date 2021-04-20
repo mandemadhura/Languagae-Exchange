@@ -1,3 +1,5 @@
+'''Module for Postgres Database routines'''
+
 import psycopg2
 
 from database import Database
@@ -8,23 +10,66 @@ from conf.log.lang_exch_logging import logger
 class PostgresDB(Database):
     '''Connects and communicates to postgres database'''
 
-    def __init__(self, host, username, database, port=5432, password=None):
-        '''Init method'''
-        super(PostgresDB, self).__init__(host, port, username, password)
+    def __init__(self, host: str, username: str, database: str, port: int=5432, password: str=None):
+        '''Init method
+        Args:
+            host: hostname to connect to database
+            username: database username
+            database: database name
+            port: port for connection
+            password: database password
+
+        Returns:
+            PostgresDB()
+        '''
+        super().__init__(host, port, username, password)
         self._db_name = database
         self.pg_conn_obj = None
 
-    def connect(self):
-        '''establishes a connection to postgres'''
+    def close(self) -> None:
+        '''closes connection with postgres
+        Args:
+            None
+
+        Returns:
+            None
+        '''
+
+    def is_open(self) -> bool:
+        '''Returns True if connection with postgres
+        database is open
+
+        Args:
+            None
+
+        Returns:
+            None
+        '''
+
+    def connect(self) -> None:
+        '''establishes a connection to postgres
+
+        Args:
+            None
+
+        Returns:
+            None
+        '''
         self.pg_conn_obj = psycopg2.connect(
                     host=self._host,
                     user=self._username,
                     password=self._password,
                     port=self._port)
 
-    def add_language(self, lang_obj):
-        '''A new table entry will be added for a new language'''
+    def add_language(self, lang_obj: Language) -> None:
+        '''A new table entry will be added for a new language
 
+        Args:
+            lang_onj: object of type Language
+
+        Returns:
+            None
+        '''
         lang = lang_obj.get_language_name()
 
         # Use in-memory cursor object for fast read write access
@@ -45,8 +90,16 @@ class PostgresDB(Database):
         cursor_obj.close()
         logger.info(f'New language:{lang} successfully added in the Database')
 
-    def update_language(self, lang_obj, new_lang):
-        '''An entry will be updated for the existing language'''
+    def update_language(self, lang_obj: Language, new_lang: str) -> None:
+        '''An entry will be updated for the existing language
+
+        Args:
+            lang_obj: object of type Language
+            new_lang: A new language name
+
+        Returns:
+            None
+        '''
         lang_id = lang_obj.get_lang_id()
 
         cursor_obj = self.pg_conn_obj.cursor()
@@ -61,8 +114,15 @@ class PostgresDB(Database):
         cursor_obj.close()
         logger.info(f'language successfully updated with {new_lang} in the Database')
 
-    def delete_language(self, lang_obj):
-        '''An entry for the requested language will be deleted'''
+    def delete_language(self, lang_obj: Language) -> None:
+        '''An entry for the requested language will be deleted
+
+        Args:
+            lang_obj: An object of type Language
+
+        Returns:
+            None
+        '''
         lang_id = lang_obj.get_lang_id()
 
         cursor_obj = self.pg_conn_obj.cursor()
@@ -75,11 +135,17 @@ class PostgresDB(Database):
 
         self.pg_conn_obj.commit()
         cursor_obj.close()
-        logger.info(f'language successfully deleted from the Database')
+        logger.info('language successfully deleted from the Database')
 
-    def get_language(self, lang_id):
-        '''Returns a language record for a given id'''
+    def get_language(self, lang_id: int) -> str:
+        '''Returns a language record for a given id
 
+        args:
+            lang_id: id of a language whose record is needed
+
+        returns:
+            None
+        '''
         cursor_obj = self.pg_conn_obj.cursor()
 
         cursor_obj.execute("""
@@ -96,8 +162,15 @@ class PostgresDB(Database):
 
         cursor_obj.close()
 
-    def get_languages(self):
-        '''Returns all the language records'''
+    def get_languages(self) -> None:
+        '''Returns all the language records
+
+        args:
+            None
+
+        returns:
+            None
+        '''
 
         cursor_obj = self.pg_conn_obj.cursor()
 
@@ -115,8 +188,8 @@ class PostgresDB(Database):
 
 pd = PostgresDB('localhost', 'le_user', 'lang_exch')
 pd.connect()
-l = Language('Germn', 13)
-#pd.add_language(l)
+l = Language('Germn', 14)
+# pd.add_language(l)
 # pd.update_language(l, 'German')
 # pd.delete_language(l)
 # pd.get_language(1)

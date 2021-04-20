@@ -1,3 +1,5 @@
+'''Module for retrieveing a Language data'''
+
 class Language:
     '''Represenst a single language'''
 
