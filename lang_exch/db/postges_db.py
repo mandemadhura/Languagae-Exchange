@@ -2,9 +2,9 @@
 
 import psycopg2
 
-from database import Database
-from models.language import Language
-from conf.log.lang_exch_logging import logger
+from lang_exch.db.database import Database
+from lang_exch.models.language import Language
+from lang_exch.conf.log.lang_exch_logging import logger
 
 
 class PostgresDB(Database):
@@ -24,7 +24,7 @@ class PostgresDB(Database):
         '''
         super().__init__(host, port, username, password)
         self._db_name = database
-        self.pg_conn_obj = None
+        self.__pg_conn_obj = None
 
     def close(self) -> None:
         '''closes connection with postgres
@@ -55,7 +55,7 @@ class PostgresDB(Database):
         Returns:
             None
         '''
-        self.pg_conn_obj = psycopg2.connect(
+        self.__pg_conn_obj = psycopg2.connect(
                     host=self._host,
                     user=self._username,
                     password=self._password,
@@ -74,7 +74,7 @@ class PostgresDB(Database):
 
         # Use in-memory cursor object for fast read write access
         # This will create as well as open the cursor
-        cursor_obj = self.pg_conn_obj.cursor()
+        cursor_obj = self.__pg_conn_obj.cursor()
 
         # TODO: how to get table name and how to get column name.
         # For now, its hardcoded
@@ -86,7 +86,7 @@ class PostgresDB(Database):
 
         # commit the transaction in order to flush the
         # in-memory cursor buffer
-        self.pg_conn_obj.commit()
+        self.__pg_conn_obj.commit()
         cursor_obj.close()
         logger.info(f'New language:{lang} successfully added in the Database')
 
@@ -102,7 +102,7 @@ class PostgresDB(Database):
         '''
         lang_id = lang_obj.get_lang_id()
 
-        cursor_obj = self.pg_conn_obj.cursor()
+        cursor_obj = self.__pg_conn_obj.cursor()
 
         cursor_obj.execute("""
         UPDATE lang_exch.languages SET lang_name = %(str)s
@@ -110,7 +110,7 @@ class PostgresDB(Database):
         """,
         {'str': new_lang, 'int': lang_id})
 
-        self.pg_conn_obj.commit()
+        self.__pg_conn_obj.commit()
         cursor_obj.close()
         logger.info(f'language successfully updated with {new_lang} in the Database')
 
@@ -125,7 +125,7 @@ class PostgresDB(Database):
         '''
         lang_id = lang_obj.get_lang_id()
 
-        cursor_obj = self.pg_conn_obj.cursor()
+        cursor_obj = self.__pg_conn_obj.cursor()
 
         cursor_obj.execute("""
         DELETE FROM lang_exch.languages
@@ -133,7 +133,7 @@ class PostgresDB(Database):
         """,
         {'int': lang_id})
 
-        self.pg_conn_obj.commit()
+        self.__pg_conn_obj.commit()
         cursor_obj.close()
         logger.info('language successfully deleted from the Database')
 
@@ -146,7 +146,7 @@ class PostgresDB(Database):
         returns:
             None
         '''
-        cursor_obj = self.pg_conn_obj.cursor()
+        cursor_obj = self.__pg_conn_obj.cursor()
 
         cursor_obj.execute("""
         SELECT * FROM lang_exch.languages
@@ -172,7 +172,7 @@ class PostgresDB(Database):
             None
         '''
 
-        cursor_obj = self.pg_conn_obj.cursor()
+        cursor_obj = self.__pg_conn_obj.cursor()
 
         cursor_obj.execute("""
         SELECT * FROM lang_exch.languages;
@@ -186,11 +186,12 @@ class PostgresDB(Database):
 
         cursor_obj.close()
 
-pd = PostgresDB('localhost', 'le_user', 'lang_exch')
-pd.connect()
-l = Language('Germn', 14)
-# pd.add_language(l)
-# pd.update_language(l, 'German')
-# pd.delete_language(l)
-# pd.get_language(1)
-pd.get_languages()
+print('inside')
+#pd = PostgresDB('localhost', 'le_user', 'lang_exch')
+#pd.connect()
+#l = Language('Germn', 14)
+## pd.add_language(l)
+## pd.update_language(l, 'German')
+## pd.delete_language(l)
+## pd.get_language(1)
+#pd.get_languages()
