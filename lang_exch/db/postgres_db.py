@@ -10,7 +10,7 @@ from lang_exch.conf.log.lang_exch_logging import logger
 class PostgresDB(Database):
     '''Connects and communicates to postgres database'''
 
-    def __init__(self, host: str, username: str, database: str, port: int=5432, password: str=None):
+    def __init__(self, **kwargs): #host: str, username: str, database: str, port: int=5432, password: str=None):
         '''Init method
         Args:
             host: hostname to connect to database
@@ -22,8 +22,16 @@ class PostgresDB(Database):
         Returns:
             PostgresDB()
         '''
+        for args_val in kwargs.values():
+            db_conf_dict = args_val
+
+        self._db_name = db_conf_dict['provider']
+        host = db_conf_dict['host']
+        port = db_conf_dict['port']
+        username = db_conf_dict['username']
+        password = db_conf_dict['password']
         super().__init__(host, port, username, password)
-        self._db_name = database
+        print(f'{host} {port} {username} {password}')
         self.__pg_conn_obj = None
 
     def close(self) -> None:
@@ -186,7 +194,6 @@ class PostgresDB(Database):
 
         cursor_obj.close()
 
-print('inside')
 #pd = PostgresDB('localhost', 'le_user', 'lang_exch')
 #pd.connect()
 #l = Language('Germn', 14)
