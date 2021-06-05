@@ -1,8 +1,9 @@
-impoiirt importlib
+import importlib
 import os
 import sys
 from pathlib import Path
 
+from lang_exch.conf.log.lang_exch_logging import logger
 from lang_exch.setup.setup import config
 
 
@@ -18,18 +19,12 @@ class DBFactory:
 
     def get_instance(db_name):
         '''Returns an instance of a database provider'''
-        pwd = os.getcwd()
         req_path = None
+        req_path = os.path.dirname(__file__)
         _db_instance = None
 
-        # Get the provider module like 'PostgresDB'.
-        # Dont hardcode it
-        for path in sys.path:
-            if pwd in path:
-                req_path = path
-                break
-
         if req_path:
+            logger.info(f'{req_path}: req_path')
             # get the PosixPath
             db_path = Path(req_path)
             if db_path.exists():
@@ -37,16 +32,18 @@ class DBFactory:
                 # But facing one problem after one iteration. Hence, iterating
                 # using os.listdir()
                 for pkg in os.listdir(db_path):
+                    logger.info(f'pkg loop: {pkg}')
                     if not os.path.isdir(pkg) and db_name in pkg:
-                        module = importlib.import_module(pkg.split('.')[0])
+                        logger.info(f'pkg: {pkg}, package:{__package__}')
+                        module = importlib.import_module('.' + pkg.split('.')[0], package=__package__)
                         db_attribute = getattr(module, 'PostgresDB', None)
                         if db_attribute is not None:
                             _db_instance = db_attribute(db_config = dict(config._sections['database']))
                             break
         return _db_instance
 
-if __name__ == '__main__':
-    import pdb
-    # pdb.set_trace()
-    db = DBFactory('postgres')
-    db = DBFactory('postgres')
+#if __name__ == '__main__':
+#    import pdb
+#    # pdb.set_trace()
+#    db = DBFactory('postgres')
+#    db = DBFactory('postgres')

@@ -4,6 +4,8 @@ import json
 from http import HTTPStatus
 from flask import Flask, request
 
+from lang_exch.db.db_manager import DatabaseManager
+
 
 app = Flask(__name__)
 existing_language = {"1": "Marathi"}
@@ -64,7 +66,10 @@ def create_language() -> (dict, str):
         if request.headers['Content-type'] != 'application/json':
             return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
         lang_input = json.loads(request.data)
-        lang_id, lang_name = lang_input['lang_id'], lang_input['lang_name']
+        lang_name = lang_input['lang_name']
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            _db_manager.add_language(lang_name)
     except (ValueError, KeyError, TypeError) as json_err:
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or not isinstance(lang_name, str):

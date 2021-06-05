@@ -88,7 +88,7 @@ class PostgresDB(Database):
         # For now, its hardcoded
         cursor_obj.execute("""
         INSERT INTO lang_exch.languages (lang_name)
-        VALUES (%(str)s);
+        VALUES (%(str)s) RETURNING lang_id INTO pri_id;
         """,
         {'str': lang})
 
@@ -96,7 +96,7 @@ class PostgresDB(Database):
         # in-memory cursor buffer
         self.__pg_conn_obj.commit()
         cursor_obj.close()
-        logger.info(f'New language:{lang} successfully added in the Database')
+        logger.info(f'New language:{lang} successfully added in the Database: {pri_id}')
 
     def update_language(self, lang_obj: Language, new_lang: str) -> None:
         '''An entry will be updated for the existing language
