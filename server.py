@@ -69,7 +69,7 @@ def create_language() -> (dict, str):
         lang_name = lang_input['lang_name']
         _db_manager = DatabaseManager()
         if _db_manager is not None:
-            _db_manager.add_language(lang_name)
+            lang_id = _db_manager.add_language(lang_name) or None
     except (ValueError, KeyError, TypeError) as json_err:
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or not isinstance(lang_name, str):

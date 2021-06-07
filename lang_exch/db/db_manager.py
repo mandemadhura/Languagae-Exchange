@@ -23,6 +23,7 @@ class DatabaseManager():
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
-        self._db.add_language(Language(lang_name))
+        lang_id = self._db.add_language(Language(lang_name)) or None
+        return lang_id
 
 

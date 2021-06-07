@@ -78,6 +78,7 @@ class PostgresDB(Database):
         Returns:
             None
         '''
+        language_id = None
         lang = lang_obj.get_language_name()
 
         # Use in-memory cursor object for fast read write access
@@ -88,15 +89,18 @@ class PostgresDB(Database):
         # For now, its hardcoded
         cursor_obj.execute("""
         INSERT INTO lang_exch.languages (lang_name)
-        VALUES (%(str)s) RETURNING lang_id INTO pri_id;
+        VALUES (%(str)s) RETURNING lang_id;
         """,
         {'str': lang})
+
+        language_id = cursor_obj.fetchone()[0]
 
         # commit the transaction in order to flush the
         # in-memory cursor buffer
         self.__pg_conn_obj.commit()
         cursor_obj.close()
-        logger.info(f'New language:{lang} successfully added in the Database: {pri_id}')
+        logger.info(f'New language:{lang} successfully added in the Database: {language_id}')
+        return language_id
 
     def update_language(self, lang_obj: Language, new_lang: str) -> None:
         '''An entry will be updated for the existing language
