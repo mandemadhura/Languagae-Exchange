@@ -3,14 +3,13 @@
 import psycopg2
 
 from lang_exch.db.database import Database
-from lang_exch.models.language import Language
 from lang_exch.conf.log.lang_exch_logging import logger
 
 
 class PostgresDB(Database):
     '''Connects and communicates to postgres database'''
 
-    def __init__(self, **kwargs): #host: str, username: str, database: str, port: int=5432, password: str=None):
+    def __init__(self, **kwargs):
         '''Init method
         Args:
             host: hostname to connect to database
@@ -69,7 +68,7 @@ class PostgresDB(Database):
                     password=self._password,
                     port=self._port)
 
-    def add_language(self, lang) -> None:
+    def add_language(self, lang: str) -> None:
         '''A new table entry will be added for a new language
 
         Args:
@@ -144,7 +143,8 @@ class PostgresDB(Database):
 
         self.__pg_conn_obj.commit()
         cursor_obj.close()
-        logger.info('language successfully deleted from the Database')
+        logger.info(f'language with lang_id: {lang_id} successfully \
+                     deleted from the Database')
 
     def get_language(self, lang_id: int) -> str:
         '''Returns a language record for a given id

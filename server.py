@@ -94,9 +94,12 @@ def delete_language(lang_id=None) -> (dict, str):
         {error: <error_string>, "data": ''}
         status_code: int
     '''
-    if lang_id not in existing_language.keys():
-        return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+    #if lang_id not in existing_language.keys():
+    #    return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     # TODO: Handle Language already in use
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        _db_manager.delete_language(Language(lang_id=lang_id))
     return success_response(HTTPStatus.OK, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['PUT'])
