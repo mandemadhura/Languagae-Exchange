@@ -69,7 +69,7 @@ class PostgresDB(Database):
                     password=self._password,
                     port=self._port)
 
-    def add_language(self, lang_obj: Language) -> None:
+    def add_language(self, lang) -> None:
         '''A new table entry will be added for a new language
 
         Args:
@@ -79,7 +79,6 @@ class PostgresDB(Database):
             None
         '''
         language_id = None
-        lang = lang_obj.get_language_name()
 
         # Use in-memory cursor object for fast read write access
         # This will create as well as open the cursor
@@ -102,7 +101,7 @@ class PostgresDB(Database):
         logger.info(f'New language:{lang} successfully added in the Database: {language_id}')
         return language_id
 
-    def update_language(self, lang_obj: Language, new_lang: str) -> None:
+    def update_language(self, lang_id: int, new_lang: str) -> None:
         '''An entry will be updated for the existing language
 
         Args:
@@ -112,7 +111,7 @@ class PostgresDB(Database):
         Returns:
             None
         '''
-        lang_id = lang_obj.get_lang_id()
+        logger.info(f'Updating a language to a database')
 
         cursor_obj = self.__pg_conn_obj.cursor()
 
@@ -126,7 +125,7 @@ class PostgresDB(Database):
         cursor_obj.close()
         logger.info(f'language successfully updated with {new_lang} in the Database')
 
-    def delete_language(self, lang_obj: Language) -> None:
+    def delete_language(self, lang_id: int) -> None:
         '''An entry for the requested language will be deleted
 
         Args:
@@ -135,8 +134,6 @@ class PostgresDB(Database):
         Returns:
             None
         '''
-        lang_id = lang_obj.get_lang_id()
-
         cursor_obj = self.__pg_conn_obj.cursor()
 
         cursor_obj.execute("""
@@ -198,11 +195,17 @@ class PostgresDB(Database):
 
         cursor_obj.close()
 
-#pd = PostgresDB('localhost', 'le_user', 'lang_exch')
-#pd.connect()
-#l = Language('Germn', 14)
-## pd.add_language(l)
-## pd.update_language(l, 'German')
-## pd.delete_language(l)
-## pd.get_language(1)
-#pd.get_languages()
+#if __name__ == '__main__':
+#    import pdb
+#    # pdb.set_trace()
+#    db = DBFactory('postgres')
+#    db = DBFactory('postgres')
+#
+## pd = PostgresDB(host='localhost', provider='postgres', username='le_user', password='lang_exch')
+#    db.connect()
+#    l = Language('Germn', 14)
+#    db.add_language(l)
+#    db.update_language(l, 'German')
+### pd.delete_language(l)
+### pd.get_language(1)
+##pd.get_languages()
