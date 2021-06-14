@@ -24,7 +24,6 @@ class DBFactory:
         _db_instance = None
 
         if req_path:
-            logger.info(f'{req_path}: req_path')
             # get the PosixPath
             db_path = Path(req_path)
             if db_path.exists():
@@ -32,9 +31,7 @@ class DBFactory:
                 # But facing one problem after one iteration. Hence, iterating
                 # using os.listdir()
                 for pkg in os.listdir(db_path):
-                    logger.info(f'pkg loop: {pkg}')
                     if not os.path.isdir(pkg) and db_name in pkg:
-                        logger.info(f'pkg: {pkg}, package:{__package__}')
                         module = importlib.import_module('.' + pkg.split('.')[0], package=__package__)
                         db_attribute = getattr(module, 'PostgresDB', None)
                         if db_attribute is not None:
