@@ -8,7 +8,7 @@ from lang_exch.db.db_manager import DatabaseManager
 
 
 app = Flask(__name__)
-existing_language = {"1": "Marathi"}
+existing_language = {"1": "Gujarati", "6": "Marathi"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
@@ -67,15 +67,17 @@ def create_language() -> (dict, str):
             return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
         lang_input = json.loads(request.data)
         lang_name = lang_input['lang_name']
-        _db_manager = DatabaseManager()
-        if _db_manager is not None:
-            lang_id = _db_manager.add_language(lang_name) or None
     except (ValueError, KeyError, TypeError) as json_err:
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or not isinstance(lang_name, str):
         return error_response('Invalid input', HTTPStatus.UNPROCESSABLE_ENTITY)
     if lang_name in existing_language.values():
         return error_response('Language already exists', HTTPStatus.CONFLICT)
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        lang_id = _db_manager.add_language(lang_name) or None
+        if lang_id is not None:
+            existing_language[lang_id] = lang_name
     return success_response(HTTPStatus.CREATED, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['DELETE'])
@@ -94,6 +96,10 @@ def delete_language(lang_id=None) -> (dict, str):
     '''
     if lang_id not in existing_language.keys():
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        _db_manager.delete_language(lang_id)
+        del existing_language[lang_id]
     # TODO: Handle Language already in use
     return success_response(HTTPStatus.OK, lang_id)
 
@@ -124,6 +130,10 @@ def update_language(lang_id: int=None) -> (dict, str):
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     if lang_name in existing_language.values():
         return error_response('Language name must be unique', HTTPStatus.CONFLICT)
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        _db_manager.update_language(lang_id, lang_name)
+        existing_language[lang_id] = lang_name
     return success_response(HTTPStatus.OK, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['GET'])
@@ -141,7 +151,9 @@ def get_a_language(lang_id: int=None) -> (dict, str):
     '''
     if lang_id not in existing_language.keys():
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
-    lang_name = existing_language[lang_id]
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        lang_name = _db_manager.get_a_language(lang_id)
     return success_response(HTTPStatus.OK, lang_id, lang_name)
 
 @app.route('/languages/', methods=['GET'])
@@ -158,8 +170,12 @@ def get_languages() -> (dict, str):
         status_code: int
     '''
     languages = []
-    for lang_id, lang_name in existing_language.items():
-        languages.append({'lang_id': lang_id, 'lang_name': lang_name})
+    _db_manager = DatabaseManager()
+    if _db_manager is not None:
+        id_name_map = _db_manager.get_languages() or {}
+    if id_name_map:
+        for id, name in id_name_map.items():
+            languages.append({'lang_id': id, 'lang_name': name})
     return success_response(HTTPStatus.OK, lang_obj=languages)
 
 

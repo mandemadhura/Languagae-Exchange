@@ -26,12 +26,13 @@ class PostgresDB(Database):
             db_conf_dict = args_val
 
         self._db_name = db_conf_dict['provider']
-        host = db_conf_dict['host']
-        port = db_conf_dict['port']
-        username = db_conf_dict['username']
-        password = db_conf_dict['password']
-        super().__init__(host, port, username, password)
-        print(f'{host} {port} {username} {password}')
+        self._host = db_conf_dict['host']
+        self._port = db_conf_dict['port']
+        self._username = db_conf_dict['username']
+        self._password = db_conf_dict['password']
+        self._database = db_conf_dict['database']
+        super().__init__(self._host, self._port, self._username, self._password)
+        print(f'{self._host} {self._port} {self._username} {self._password} {self._database}')
         self.__pg_conn_obj = None
 
     def close(self) -> None:
@@ -67,6 +68,7 @@ class PostgresDB(Database):
                     host=self._host,
                     user=self._username,
                     password=self._password,
+                    database=self._database,
                     port=self._port)
 
     def add_language(self, lang_obj: Language) -> None:
@@ -166,13 +168,9 @@ class PostgresDB(Database):
         """,
         {'int': lang_id})
 
-        row = cursor_obj.fetchone()
-        while row:
-            print(row)
-            logger.info(f'Corresponding language for a language: {row}')
-            row = cursor_obj.fetchone()
-
+        lang_name = cursor_obj.fetchone()[1]
         cursor_obj.close()
+        return lang_name
 
     def get_languages(self) -> None:
         '''Returns all the language records
@@ -190,13 +188,15 @@ class PostgresDB(Database):
         SELECT * FROM lang_exch.languages;
         """)
 
-        row = cursor_obj.fetchone()
-        while row:
-            logger.info(f'Corresponding language for all language get query: {row}')
-            print(row)
-            row = cursor_obj.fetchone()
-
+        row = cursor_obj.fetchall()
+        logger.info(row)
+        id_name_map = {}
+        for fields in row:
+            logger.info(f'Corresponding language for all language get query:')
+            id_name_map[fields[0]] = fields[1].strip()
+        logger.error(f'{id_name_map}')
         cursor_obj.close()
+        return id_name_map
 
 #pd = PostgresDB('localhost', 'le_user', 'lang_exch')
 #pd.connect()
