@@ -8,7 +8,7 @@ from lang_exch.db.db_manager import DatabaseManager
 
 
 app = Flask(__name__)
-existing_language = {"1": "Gujarati", "6": "Marathi"}
+existing_language = {"1": "Gujarati", "6": "Marathi", "2": "Hindi"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
