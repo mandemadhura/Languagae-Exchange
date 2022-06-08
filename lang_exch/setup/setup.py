@@ -1,8 +1,9 @@
 import configparser
+from lang_exch.const import confSection, loggingSection, CONF_FILE
 
 config = configparser.ConfigParser()
-config.read('lang_exch/conf/lang_exc.conf')
+config.read(CONF_FILE)
 
 
-LOG_LEVEL = config['logging']['log_level']
-LOG_FILE = config['logging']['log_file']
+LOG_LEVEL = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_LEVEL_KEY.value]
+LOG_FILE = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_FILE_KEY.value]

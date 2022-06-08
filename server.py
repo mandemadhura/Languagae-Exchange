@@ -4,11 +4,13 @@ import json
 from http import HTTPStatus
 from flask import Flask, request
 
+from lang_exch.setup.setup import config
 from lang_exch.db.db_manager import DatabaseManager
+from lang_exch.const import serverSection, confSection
 
 
 app = Flask(__name__)
-existing_language = {"1": "Gujarati", "6": "Marathi"}
+existing_language = {"1": "Gujarati", "7": "Marathi"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
@@ -180,4 +182,7 @@ def get_languages() -> (dict, str):
 
 
 if __name__ == '__main__':
-    app.run()
+
+    server_section = confSection.SERVER_SECTION.value
+    app.run(host=config[server_section][serverSection.SERVER_IP_KEY.value], \
+            port=config[server_section][serverSection.SERVER_PORT_KEY.value])

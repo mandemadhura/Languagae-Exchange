@@ -47,3 +47,4 @@ class DBFactory:
 #    # pdb.set_trace()
 #    db = DBFactory('postgres')
 #    db = DBFactory('postgres')
+#    print(db)

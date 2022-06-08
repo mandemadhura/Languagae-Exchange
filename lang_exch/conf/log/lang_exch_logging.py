@@ -14,7 +14,7 @@ log_level_mapping = {
 logger.setLevel(logging.DEBUG)
 
 print(f">>>>>>>>>>>>>>>>>>>>>> {type(LOG_FILE)}")
-f = "/var/log/lang_exch.log"
+# f = "/var/log/lang_exch.log"
 handler = logging.FileHandler(os.path.abspath(LOG_FILE))
 
 # From INFO onwards, logs will be populated

@@ -1,3 +1,4 @@
+from lang_exch.const import dataBaseSection, confSection
 from lang_exch.db.db_factory import DBFactory
 from lang_exch.models.language import Language
 from lang_exch.setup.setup import config
@@ -6,7 +7,7 @@ from lang_exch.setup.setup import config
 class DatabaseManager():
 
     def __init__(self):
-        db_provider = config['database']['provider']
+        db_provider = config[confSection.DATABASE_SECTION.value][dataBaseSection.DB_PROVIDER_KEY.value]
         self._db = DBFactory(db_provider)
         self._db.connect()
         

@@ -5,6 +5,7 @@ import psycopg2
 from lang_exch.db.database import Database
 from lang_exch.models.language import Language
 from lang_exch.conf.log.lang_exch_logging import logger
+from lang_exch.const import dataBaseSection
 
 
 class PostgresDB(Database):
@@ -25,12 +26,12 @@ class PostgresDB(Database):
         for args_val in kwargs.values():
             db_conf_dict = args_val
 
-        self._db_name = db_conf_dict['provider']
-        self._host = db_conf_dict['host']
-        self._port = db_conf_dict['port']
-        self._username = db_conf_dict['username']
-        self._password = db_conf_dict['password']
-        self._database = db_conf_dict['database']
+        self._db_name = db_conf_dict[dataBaseSection.DB_PROVIDER_KEY.value]
+        self._host = db_conf_dict[dataBaseSection.DB_HOST_KEY.value]
+        self._port = db_conf_dict[dataBaseSection.DB_PORT_KEY.value]
+        self._username = db_conf_dict[dataBaseSection.DB_USERNAME_KEY.value]
+        self._password = db_conf_dict[dataBaseSection.DB_PASSWORD_KEY.value]
+        self._database = db_conf_dict[dataBaseSection.DB_DATABASE_KEY.value]
         super().__init__(self._host, self._port, self._username, self._password)
         print(f'{self._host} {self._port} {self._username} {self._password} {self._database}')
         self.__pg_conn_obj = None
@@ -189,12 +190,10 @@ class PostgresDB(Database):
         """)
 
         row = cursor_obj.fetchall()
-        logger.info(row)
         id_name_map = {}
         for fields in row:
             logger.info(f'Corresponding language for all language get query:')
             id_name_map[fields[0]] = fields[1].strip()
-        logger.error(f'{id_name_map}')
         cursor_obj.close()
         return id_name_map
 
