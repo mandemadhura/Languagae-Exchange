@@ -19,6 +19,7 @@ class dataBaseSection(Enum):
 class loggingSection(Enum):
     LOG_FILE_KEY = "log_file"
     LOG_LEVEL_KEY = "log_level"
+    LOG_PATH_KEY = "log_path"
     
 class serverSection(Enum):
     SERVER_IP_KEY = "ip"

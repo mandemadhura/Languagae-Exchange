@@ -7,10 +7,10 @@ from flask import Flask, request
 from lang_exch.setup.setup import config
 from lang_exch.db.db_manager import DatabaseManager
 from lang_exch.const import serverSection, confSection
-
+from lang_exch.conf.log.lang_exch_logging import logger
 
 app = Flask(__name__)
-existing_language = {"1": "Gujarati", "7": "Marathi"}
+existing_language = {"1": "Gujarati", "8": "Marathi"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
@@ -68,18 +68,27 @@ def create_language() -> (dict, str):
         if request.headers['Content-type'] != 'application/json':
             return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
         lang_input = json.loads(request.data)
+        logger.info(f"Received a request to create a new language with input as: {lang_input}")
         lang_name = lang_input['lang_name']
     except (ValueError, KeyError, TypeError) as json_err:
+        logger.error(f"Can not process request, Invalid JSON format: {json_err}")
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or not isinstance(lang_name, str):
+        logger.error(f"Can not process request, Invalid input. language name must not be empty and non string")
         return error_response('Invalid input', HTTPStatus.UNPROCESSABLE_ENTITY)
     if lang_name in existing_language.values():
+        logger.error(f"Can not process request, language name already exists. language name must be unique")
         return error_response('Language already exists', HTTPStatus.CONFLICT)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
         lang_id = _db_manager.add_language(lang_name) or None
         if lang_id is not None:
+            logger.info(f"language {lang_name} successfully added with ID: {lang_id}. \
+                Now updating in memory store")
             existing_language[lang_id] = lang_name
+        else:
+            logger.error(f"Failed to add language {lang_name} in the database")
+            return error_response('Some problem occured. Failed to add new language entry')
     return success_response(HTTPStatus.CREATED, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['DELETE'])
@@ -96,11 +105,14 @@ def delete_language(lang_id=None) -> (dict, str):
         {error: <error_string>, "data": ''}
         status_code: int
     '''
+    logger.info(f"Received a request to delete the language: {lang_id}")
     if lang_id not in existing_language.keys():
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
         _db_manager.delete_language(lang_id)
+        logger.info(f"language with ID: {lang_id} successfully deleted.\
+                Now updating in memory store for respective entry")
         del existing_language[lang_id]
     # TODO: Handle Language already in use
     return success_response(HTTPStatus.OK, lang_id)
@@ -123,18 +135,25 @@ def update_language(lang_id: int=None) -> (dict, str):
         if request.headers['Content-type'] != 'application/json':
             return error_response('Unsupprted input format', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
         lang_input = json.loads(request.data)
+        logger.info(f"Received a request to update a language with input as: {lang_input}")
         lang_name = lang_input['lang_name']
     except (ValueError, KeyError, TypeError) as json_err:
+        logger.error(f"Can not process request, Invalid JSON format: {json_err}")
         return error_response(f'Invalid JSON: {json_err}', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
     if lang_name == '' or not isinstance(lang_name, str):
+        logger.error(f"Can not process request, Invalid input. language name must not be empty and non string")
         return error_response('Invalid input', HTTPStatus.UNPROCESSABLE_ENTITY)
     if lang_id not in existing_language.keys():
+        logger.error(f"Can not process request, language ID does not exist to update")
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     if lang_name in existing_language.values():
+        logger.error(f"Can not process request, language name already exists. language name must be unique")
         return error_response('Language name must be unique', HTTPStatus.CONFLICT)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
         _db_manager.update_language(lang_id, lang_name)
+        logger.info(f"language ID: {lang_id} successfully updated with: {lang_name}. \
+                Now updating in memory store")
         existing_language[lang_id] = lang_name
     return success_response(HTTPStatus.OK, lang_id)
 
@@ -151,11 +170,14 @@ def get_a_language(lang_id: int=None) -> (dict, str):
         {error: <error_string>, "data": ''}
         status_code: int
     '''
+    logger.info(f"Received a request to get the language details for ID: {lang_id}")
     if lang_id not in existing_language.keys():
+        logger.error(f"No data found for reqested language: {lang_id}")
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
         lang_name = _db_manager.get_a_language(lang_id)
+        logger.info(f"data succesfully fetched: {lang_id}: {lang_name}")
     return success_response(HTTPStatus.OK, lang_id, lang_name)
 
 @app.route('/languages/', methods=['GET'])
@@ -172,10 +194,12 @@ def get_languages() -> (dict, str):
         status_code: int
     '''
     languages = []
+    logger.info(f"Received a request to fetch all language data")
     _db_manager = DatabaseManager()
     if _db_manager is not None:
         id_name_map = _db_manager.get_languages() or {}
     if id_name_map:
+        logger.info(f"Fetched language data: {id_name_map}")
         for id, name in id_name_map.items():
             languages.append({'lang_id': id, 'lang_name': name})
     return success_response(HTTPStatus.OK, lang_obj=languages)
