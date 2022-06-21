@@ -19,10 +19,14 @@ class DatabaseManager():
         '''
         logger.info(f"Requesting a db to add new language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
+            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+                            all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
+            logger.error(f"{lang_name} is not a valid language. Language length must be \
+                        between 1 to 20")
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
@@ -36,10 +40,14 @@ class DatabaseManager():
         '''
         logger.info(f"Requesting a db to update a language ID: {lang_id} with language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
+            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+                            all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
+            logger.error(f"{lang_name} is not a valid language. Language length must be \
+                        between 1 to 20")
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')

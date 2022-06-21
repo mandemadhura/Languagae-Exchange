@@ -1,6 +1,12 @@
 import logging
 import os
-from lang_exch.setup.setup import LOG_FILE, LOG_LEVEL, LOG_PATH
+
+from lang_exch.const import confSection, loggingSection
+from lang_exch.setup.setup import config
+
+LOG_LEVEL = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_LEVEL_KEY.value]
+LOG_FILE = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_FILE_KEY.value]
+LOG_PATH = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_PATH_KEY.value]
 
 logger = logging.getLogger('language-exchange')
 
@@ -24,7 +30,7 @@ handler = logging.FileHandler(os.path.abspath(log_file))
 handler.setLevel(log_level_mapping[LOG_LEVEL])
 
 log_format = '%(asctime)s %(name)s [%(process)d]: %(levelname)s %(message)s'
-formatter = logging.Formatter(log_format, "%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter(log_format, "%Y-%m-%d %H:%M:%S")  
 handler.setFormatter(formatter)
 
 logger.addHandler(handler)

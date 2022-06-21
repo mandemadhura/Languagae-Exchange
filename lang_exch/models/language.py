@@ -1,7 +1,11 @@
 '''Module for retrieveing a Language data'''
 
+
+from lang_exch.conf.log.lang_exch_logging import logger
+
+
 class Language:
-    '''Represenst a single language'''
+    '''Represent a single language'''
 
     def __init__(self, lang_name=None, lang_id=None):
         '''Init method'''

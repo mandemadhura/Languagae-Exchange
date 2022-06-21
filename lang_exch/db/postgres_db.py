@@ -33,7 +33,9 @@ class PostgresDB(Database):
         self._password = db_conf_dict[dataBaseSection.DB_PASSWORD_KEY.value]
         self._database = db_conf_dict[dataBaseSection.DB_DATABASE_KEY.value]
         super().__init__(self._host, self._port, self._username, self._password)
-        # print(f'{self._host} {self._port} {self._username} {self._password} {self._database}')
+        logger.debug(f'Received database connection paremeters: Host: {self._host} \
+            Port: {self._port} Uname: {self._username} Pwd: {self._password} \
+                Database: {self._database}')
         self.__pg_conn_obj = None
 
     def close(self) -> None:
@@ -71,6 +73,7 @@ class PostgresDB(Database):
                     password=self._password,
                     database=self._database,
                     port=self._port)
+        logger.debug(f"Connected to postgres database: {self.__pg_conn_obj}")
 
     def add_language(self, lang_obj: Language) -> None:
         '''A new table entry will be added for a new language

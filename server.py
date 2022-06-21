@@ -10,7 +10,7 @@ from lang_exch.const import serverSection, confSection
 from lang_exch.conf.log.lang_exch_logging import logger
 
 app = Flask(__name__)
-existing_language = {"1": "Gujarati", "8": "Marathi"}
+existing_language = {"1": "Gujarati", "9": "Gujarati"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
@@ -107,6 +107,7 @@ def delete_language(lang_id=None) -> (dict, str):
     '''
     logger.info(f"Received a request to delete the language: {lang_id}")
     if lang_id not in existing_language.keys():
+        logger.error(f'Language does not exist with ID:{lang_id}')
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
@@ -172,7 +173,7 @@ def get_a_language(lang_id: int=None) -> (dict, str):
     '''
     logger.info(f"Received a request to get the language details for ID: {lang_id}")
     if lang_id not in existing_language.keys():
-        logger.error(f"No data found for reqested language: {lang_id}")
+        logger.error(f"No data found for reqested language with ID: {lang_id}")
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
