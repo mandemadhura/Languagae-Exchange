@@ -33,7 +33,9 @@ class PostgresDB(Database):
         self._password = db_conf_dict[dataBaseSection.DB_PASSWORD_KEY.value]
         self._database = db_conf_dict[dataBaseSection.DB_DATABASE_KEY.value]
         super().__init__(self._host, self._port, self._username, self._password)
-        print(f'{self._host} {self._port} {self._username} {self._password} {self._database}')
+        logger.debug(f'Received database connection paremeters: Host: {self._host} \
+            Port: {self._port} Uname: {self._username} Pwd: {self._password} \
+                Database: {self._database}')
         self.__pg_conn_obj = None
 
     def close(self) -> None:
@@ -71,6 +73,7 @@ class PostgresDB(Database):
                     password=self._password,
                     database=self._database,
                     port=self._port)
+        logger.debug(f"Connected to postgres database: {self.__pg_conn_obj}")
 
     def add_language(self, lang_obj: Language) -> None:
         '''A new table entry will be added for a new language
@@ -87,6 +90,8 @@ class PostgresDB(Database):
         # Use in-memory cursor object for fast read write access
         # This will create as well as open the cursor
         cursor_obj = self.__pg_conn_obj.cursor()
+
+        logger.info(f'Querying database to insert a new language:{lang} to a postgres db')
 
         # TODO: how to get table name and how to get column name.
         # For now, its hardcoded
@@ -119,6 +124,9 @@ class PostgresDB(Database):
 
         cursor_obj = self.__pg_conn_obj.cursor()
 
+        logger.info(f'Querying database to update a language with ID:{lang_id} with new lang: {new_lang}\
+            to a postgres db')
+
         cursor_obj.execute("""
         UPDATE lang_exch.languages SET lang_name = %(str)s
         WHERE lang_id = %(int)s;
@@ -141,7 +149,8 @@ class PostgresDB(Database):
         lang_id = lang_obj.get_lang_id()
 
         cursor_obj = self.__pg_conn_obj.cursor()
-
+        logger.info(f'Querying database to delete a language with ID:{lang_id} to a postgres db')
+        
         cursor_obj.execute("""
         DELETE FROM lang_exch.languages
         WHERE lang_id = %(int)s;
@@ -162,7 +171,8 @@ class PostgresDB(Database):
             None
         '''
         cursor_obj = self.__pg_conn_obj.cursor()
-
+        logger.info(f'Querying database to get language details for ID:{lang_id} to a postgres db')
+    
         cursor_obj.execute("""
         SELECT * FROM lang_exch.languages
         WHERE lang_id = %(int)s;
@@ -171,6 +181,7 @@ class PostgresDB(Database):
 
         lang_name = cursor_obj.fetchone()[1]
         cursor_obj.close()
+        logger.info('language details successfully fetched from the Database')
         return lang_name
 
     def get_languages(self) -> None:
@@ -185,6 +196,8 @@ class PostgresDB(Database):
 
         cursor_obj = self.__pg_conn_obj.cursor()
 
+        logger.info(f'Querying database to get details for all languages to a postgres db')
+
         cursor_obj.execute("""
         SELECT * FROM lang_exch.languages;
         """)
@@ -195,13 +208,6 @@ class PostgresDB(Database):
             logger.info(f'Corresponding language for all language get query:')
             id_name_map[fields[0]] = fields[1].strip()
         cursor_obj.close()
+        logger.info('language details successfully fetched from the Database')
         return id_name_map
 
-#pd = PostgresDB('localhost', 'le_user', 'lang_exch')
-#pd.connect()
-#l = Language('Germn', 14)
-## pd.add_language(l)
-## pd.update_language(l, 'German')
-## pd.delete_language(l)
-## pd.get_language(1)
-#pd.get_languages()

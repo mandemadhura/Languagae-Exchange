@@ -2,6 +2,7 @@ from lang_exch.const import dataBaseSection, confSection
 from lang_exch.db.db_factory import DBFactory
 from lang_exch.models.language import Language
 from lang_exch.setup.setup import config
+from lang_exch.conf.log.lang_exch_logging import logger
 
 
 class DatabaseManager():
@@ -16,11 +17,16 @@ class DatabaseManager():
            Validates a language input and then forms a Language
            object and passes this object for actual database operation
         '''
+        logger.info(f"Requesting a db to add new language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
+            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+                            all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
+            logger.error(f"{lang_name} is not a valid language. Language length must be \
+                        between 1 to 20")
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
@@ -32,11 +38,16 @@ class DatabaseManager():
         validates a language input and then forms a Language 
         object and passes this object for actual database operation
         '''
+        logger.info(f"Requesting a db to update a language ID: {lang_id} with language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
+            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+                            all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
+            logger.error(f"{lang_name} is not a valid language. Language length must be \
+                        between 1 to 20")
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
@@ -54,6 +65,7 @@ class DatabaseManager():
         Forms a language object and passes this object for actual database
         get operation
         '''
+        logger.info(f"Requesting a db to get language details for ID: {lang_id}")
         return self._db.get_language(lang_id) or None
 
     def get_languages(self):
@@ -61,4 +73,5 @@ class DatabaseManager():
         Forms a language object and passes this object for actual database
         fetch operation
         '''
+        logger.info(f"Requesting a db to get all language details")
         return self._db.get_languages()
