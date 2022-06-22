@@ -1,3 +1,4 @@
+import configparser
 from lang_exch.const import dataBaseSection, confSection
 from lang_exch.db.db_factory import DBFactory
 from lang_exch.models.language import Language
@@ -8,26 +9,33 @@ from lang_exch.conf.log.lang_exch_logging import logger
 class DatabaseManager():
 
     def __init__(self):
-        db_provider = config[confSection.DATABASE_SECTION.value][dataBaseSection.DB_PROVIDER_KEY.value]
-        self._db = DBFactory(db_provider)
-        self._db.connect()
+        try:
+            db_provider = config[confSection.DATABASE_SECTION.value][dataBaseSection.DB_PROVIDER_KEY.value]
+            self._db = DBFactory(db_provider)
+            self._db.connect()
+        except (configparser.NoSectionError, configparser.NoOptionError) as conf_err:
+            logger.error(f"DBManager: Failed to read db config details.Section or key is missing:{conf_err}")
+            raise Exception(f"DBManager: Failed to read db config details.Section or key is missing:{conf_err}")
+        except Exception as err:
+            logger.error(f"DBManager: Failed to connect to database")
+            raise
         
     def add_language(self, lang_name: str):
         '''
            Validates a language input and then forms a Language
            object and passes this object for actual database operation
         '''
-        logger.info(f"Requesting a db to add new language: {lang_name}")
+        logger.info(f"DBManager: Requesting a db to add new language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
-            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+            logger.error(f'DBManager: {lang_name} is not a valid language. Language name must contain \
                             all the characters without spacelength must be between 1 to 20')
-            raise Exception(f'{lang_name} is not a valid Language. \
+            raise Exception(f'DBManager: {lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
-            logger.error(f"{lang_name} is not a valid language. Language length must be \
+            logger.error(f"DBManager: {lang_name} is not a valid language. Language length must be \
                         between 1 to 20")
-            raise Exception(f'{lang_name} is not a valid Language. \
+            raise Exception(f'DBmanager: {lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
         lang_id = self._db.add_language(Language(lang_name)) or None
@@ -38,15 +46,15 @@ class DatabaseManager():
         validates a language input and then forms a Language 
         object and passes this object for actual database operation
         '''
-        logger.info(f"Requesting a db to update a language ID: {lang_id} with language: {lang_name}")
+        logger.info(f"DBManager: Requesting a db to update a language ID: {lang_id} with language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
-            logger.error(f'{lang_name} is not a valid language. Language name must contain \
+            logger.error(f'DBManager: {lang_name} is not a valid language. Language name must contain \
                             all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
-            logger.error(f"{lang_name} is not a valid language. Language length must be \
+            logger.error(f"DBManager {lang_name} is not a valid language. Language length must be \
                         between 1 to 20")
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
@@ -58,6 +66,7 @@ class DatabaseManager():
         Forms a Language object and passes this object for actual database 
         delete operation
         '''
+        logger.info(f"DBManager: Requesting a db to delete the language for ID: {lang_id}")
         self._db.delete_language(Language(lang_id=lang_id))
 
     def get_a_language(self, lang_id: int):
@@ -65,7 +74,7 @@ class DatabaseManager():
         Forms a language object and passes this object for actual database
         get operation
         '''
-        logger.info(f"Requesting a db to get language details for ID: {lang_id}")
+        logger.info(f"DBManager: Requesting a db to get language details for ID: {lang_id}")
         return self._db.get_language(lang_id) or None
 
     def get_languages(self):
@@ -73,5 +82,5 @@ class DatabaseManager():
         Forms a language object and passes this object for actual database
         fetch operation
         '''
-        logger.info(f"Requesting a db to get all language details")
+        logger.info(f"DBManager: Requesting a db to get all language details")
         return self._db.get_languages()

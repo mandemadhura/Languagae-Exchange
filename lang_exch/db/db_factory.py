@@ -22,22 +22,25 @@ class DBFactory:
         req_path = None
         req_path = os.path.dirname(__file__)
         _db_instance = None
-
-        if req_path:
-            # get the PosixPath
-            db_path = Path(req_path)
-            if db_path.exists():
-                # There is a way to iterate posixpath dir using iterdir()
-                # But facing one problem after one iteration. Hence, iterating
-                # using os.listdir()
-                for pkg in os.listdir(db_path):
-                    if not os.path.isdir(pkg) and db_name in pkg:
-                        logger.debug(f'Found directory path to import database')
-                        module = importlib.import_module('.' + pkg.split('.')[0], package=__package__)
-                        db_attribute = getattr(module, 'PostgresDB', None)
-                        if db_attribute is not None:
-                            logger.info(f'Instantiating a db instance: {db_attribute}')
-                            _db_instance = db_attribute(db_config = dict(config._sections['database']))
-                            break
+        try:
+            if req_path:
+                # get the PosixPath
+                db_path = Path(req_path)
+                if db_path.exists():
+                    # There is a way to iterate posixpath dir using iterdir()
+                    # But facing one problem after one iteration. Hence, iterating
+                    # using os.listdir()
+                    for pkg in os.listdir(db_path):
+                        if not os.path.isdir(pkg) and db_name in pkg:
+                            logger.debug(f'Found directory path to import database')
+                            module = importlib.import_module('.' + pkg.split('.')[0], package=__package__)
+                            db_attribute = getattr(module, 'PostgresDB', None)
+                            if db_attribute is not None:
+                                logger.info(f'Instantiating a db instance: {db_attribute}')
+                                _db_instance = db_attribute(db_config = dict(config._sections['database']))
+                                break
+        except Exception as err:
+            logger.error(f"Failed to instantiate a databse provider instance")
+            raise Exception(f"Failed to instantiate a databse provider instance")
         return _db_instance
 

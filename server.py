@@ -1,5 +1,6 @@
 '''Server module responsible for entertaining the requests'''
 
+import configparser
 import json
 from http import HTTPStatus
 from flask import Flask, request
@@ -79,16 +80,22 @@ def create_language() -> (dict, str):
     if lang_name in existing_language.values():
         logger.error(f"Can not process request, language name already exists. language name must be unique")
         return error_response('Language already exists', HTTPStatus.CONFLICT)
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        lang_id = _db_manager.add_language(lang_name) or None
-        if lang_id is not None:
-            logger.info(f"language {lang_name} successfully added with ID: {lang_id}. \
-                Now updating in memory store")
-            existing_language[lang_id] = lang_name
-        else:
-            logger.error(f"Failed to add language {lang_name} in the database")
-            return error_response('Some problem occured. Failed to add new language entry')
+    try:
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            lang_id = _db_manager.add_language(lang_name) or None
+            if lang_id is not None:
+                logger.info(f"language {lang_name} successfully added with ID: {lang_id}. \
+                    Now updating in memory store")
+                existing_language[lang_id] = lang_name
+            else:
+                logger.error(f"Failed to add language {lang_name} in the database")
+                return error_response('Some problem occured. Failed to add new language entry')
+    except KeyError as k_err:
+        logger.error(f"Failed to update in memory language store after db add for language")
+    except Exception as err:
+        logger.error(f"Failed to perform database language add operation: {err}")
+        raise Exception(f"Failed to perform database language add operation: {err}")
     return success_response(HTTPStatus.CREATED, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['DELETE'])
@@ -109,12 +116,18 @@ def delete_language(lang_id=None) -> (dict, str):
     if lang_id not in existing_language.keys():
         logger.error(f'Language does not exist with ID:{lang_id}')
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        _db_manager.delete_language(lang_id)
-        logger.info(f"language with ID: {lang_id} successfully deleted.\
-                Now updating in memory store for respective entry")
-        del existing_language[lang_id]
+    try:
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            _db_manager.delete_language(lang_id)
+            logger.info(f"language with ID: {lang_id} successfully deleted.\
+                    Now updating in memory store for respective entry")
+            del existing_language[lang_id]
+    except KeyError as k_err:
+        logger.error(f"Failed to update in memory language store after db delete for language")
+    except Exception as err:
+        logger.error(f"Failed to perform database delete operation: {err}")
+        raise Exception(f"Failed to perform database delete operation: {err}")
     # TODO: Handle Language already in use
     return success_response(HTTPStatus.OK, lang_id)
 
@@ -150,12 +163,18 @@ def update_language(lang_id: int=None) -> (dict, str):
     if lang_name in existing_language.values():
         logger.error(f"Can not process request, language name already exists. language name must be unique")
         return error_response('Language name must be unique', HTTPStatus.CONFLICT)
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        _db_manager.update_language(lang_id, lang_name)
-        logger.info(f"language ID: {lang_id} successfully updated with: {lang_name}. \
-                Now updating in memory store")
-        existing_language[lang_id] = lang_name
+    try:
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            _db_manager.update_language(lang_id, lang_name)
+            logger.info(f"language ID: {lang_id} successfully updated with: {lang_name}. \
+                    Now updating in memory store")
+            existing_language[lang_id] = lang_name
+    except KeyError as k_err:
+        logger.error(f"Failed to update in memory language store after db update for language")
+    except Exception as err:
+        logger.error(f"Failed to perform database language update operation: {err}")
+        raise Exception(f"Failed to perform database language update operation: {err}")
     return success_response(HTTPStatus.OK, lang_id)
 
 @app.route('/languages/<lang_id>', methods=['GET'])
@@ -175,10 +194,14 @@ def get_a_language(lang_id: int=None) -> (dict, str):
     if lang_id not in existing_language.keys():
         logger.error(f"No data found for reqested language with ID: {lang_id}")
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        lang_name = _db_manager.get_a_language(lang_id)
-        logger.info(f"data succesfully fetched: {lang_id}: {lang_name}")
+    try:
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            lang_name = _db_manager.get_a_language(lang_id)
+            logger.info(f"data succesfully fetched: {lang_id}: {lang_name}")
+    except Exception as err:
+        logger.error(f"Failed to perform database language get operation: {err}")
+        raise Exception(f"Failed to perform database language get operation: {err}")
     return success_response(HTTPStatus.OK, lang_id, lang_name)
 
 @app.route('/languages/', methods=['GET'])
@@ -196,18 +219,26 @@ def get_languages() -> (dict, str):
     '''
     languages = []
     logger.info(f"Received a request to fetch all language data")
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        id_name_map = _db_manager.get_languages() or {}
-    if id_name_map:
-        logger.info(f"Fetched language data: {id_name_map}")
-        for id, name in id_name_map.items():
-            languages.append({'lang_id': id, 'lang_name': name})
+    try:
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            id_name_map = _db_manager.get_languages() or {}
+        if id_name_map:
+            logger.info(f"Fetched language data: {id_name_map}")
+            for id, name in id_name_map.items():
+                languages.append({'lang_id': id, 'lang_name': name})
+    except Exception as err:
+        logger.error(f"Failed to perform database language get operation: {err}")
+        raise Exception(f"Failed to perform database language get operation: {err}")
     return success_response(HTTPStatus.OK, lang_obj=languages)
 
 
 if __name__ == '__main__':
 
     server_section = confSection.SERVER_SECTION.value
-    app.run(host=config[server_section][serverSection.SERVER_IP_KEY.value], \
-            port=config[server_section][serverSection.SERVER_PORT_KEY.value])
+    try:
+        app.run(host=config[server_section][serverSection.SERVER_IP_KEY.value], \
+                port=config[server_section][serverSection.SERVER_PORT_KEY.value])
+    except (configparser.NoSectionError, configparser.NoSectionError) as err:
+        logger.error(f"Can not start server. Failed to read server config: {err}")
+        raise Exception("Can not start server. Failed to read server config: {err}")

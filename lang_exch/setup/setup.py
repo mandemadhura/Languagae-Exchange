@@ -2,10 +2,11 @@
 
 import configparser
 
-from lang_exch.const import confSection, loggingSection, CONF_FILE
+from lang_exch.const import CONF_FILE
 
-
-config = configparser.ConfigParser()
-config.read(CONF_FILE)
-
-
+try:
+    config = configparser.ConfigParser()
+    config.read(CONF_FILE)
+except IOError as err:
+    config = None
+    raise Exception(f"Failed to read config file: {CONF_FILE}: {err}")
