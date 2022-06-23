@@ -1,6 +1,8 @@
 import configparser
+
 from lang_exch.const import dataBaseSection, confSection
 from lang_exch.db.db_factory import DBFactory
+from lang_exch.errors import languageNotValidError
 from lang_exch.models.language import Language
 from lang_exch.setup.setup import config
 from lang_exch.conf.log.lang_exch_logging import logger
@@ -27,15 +29,11 @@ class DatabaseManager():
         '''
         logger.info(f"DBManager: Requesting a db to add new language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
-            logger.error(f'DBManager: {lang_name} is not a valid language. Language name must contain \
-                            all the characters without spacelength must be between 1 to 20')
-            raise Exception(f'DBManager: {lang_name} is not a valid Language. \
+            raise languageNotValidError(msg=f'DBManager: {lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
-            logger.error(f"DBManager: {lang_name} is not a valid language. Language length must be \
-                        between 1 to 20")
-            raise Exception(f'DBmanager: {lang_name} is not a valid Language. \
+            raise languageNotValidError(msg=f'DBmanager: {lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
         lang_id = self._db.add_language(Language(lang_name)) or None
@@ -48,15 +46,11 @@ class DatabaseManager():
         '''
         logger.info(f"DBManager: Requesting a db to update a language ID: {lang_id} with language: {lang_name}")
         if not lang_name.isalpha() or ' ' in lang_name:
-            logger.error(f'DBManager: {lang_name} is not a valid language. Language name must contain \
-                            all the characters without spacelength must be between 1 to 20')
             raise Exception(f'{lang_name} is not a valid Language. \
                             Language name must contain all the \
                             characters without space in between')
         if len(lang_name) < 0 or len(lang_name) > 20:
-            logger.error(f"DBManager {lang_name} is not a valid language. Language length must be \
-                        between 1 to 20")
-            raise Exception(f'{lang_name} is not a valid Language. \
+            raise languageNotValidError(f'{lang_name} is not a valid Language. \
                             Language length must be between 1 to 20 \
                             characters')
         self._db.update_language(Language(lang_id=lang_id), lang_name)

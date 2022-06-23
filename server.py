@@ -8,10 +8,11 @@ from flask import Flask, request
 from lang_exch.setup.setup import config
 from lang_exch.db.db_manager import DatabaseManager
 from lang_exch.const import serverSection, confSection
+from lang_exch.errors import languageNotValidError
 from lang_exch.conf.log.lang_exch_logging import logger
 
 app = Flask(__name__)
-existing_language = {"1": "Gujarati", "9": "Gujarati"}
+existing_language = {"10": "Hindi", "11": "English", "1": "Dutch"}
 
 def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=None) -> (dict, int):
     '''
@@ -234,7 +235,6 @@ def get_languages() -> (dict, str):
 
 
 if __name__ == '__main__':
-
     server_section = confSection.SERVER_SECTION.value
     try:
         app.run(host=config[server_section][serverSection.SERVER_IP_KEY.value], \
