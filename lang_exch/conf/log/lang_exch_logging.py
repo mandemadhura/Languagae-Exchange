@@ -4,9 +4,12 @@ import os
 from lang_exch.const import confSection, loggingSection
 from lang_exch.setup.setup import config
 
-LOG_LEVEL = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_LEVEL_KEY.value]
-LOG_FILE = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_FILE_KEY.value]
-LOG_PATH = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_PATH_KEY.value]
+try:
+    LOG_LEVEL = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_LEVEL_KEY.value]
+    LOG_FILE = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_FILE_KEY.value]
+    LOG_PATH = config[confSection.LOGGING_SECTION.value][loggingSection.LOG_PATH_KEY.value]
+except KeyError as k_err:
+    raise Exception(f"Failed to parse the key from config: {k_err}")
 
 logger = logging.getLogger('language-exchange')
 
