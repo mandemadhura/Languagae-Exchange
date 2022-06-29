@@ -15,7 +15,7 @@ class BaseError(Exception):
         self._rc = rc
         self._desc = message
         self._caller = inspect.stack()[1][3]
-        
+
     @property
     def caller(self):
         return self._caller
