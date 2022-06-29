@@ -8,14 +8,14 @@ class BaseError(Exception):
     _rc = 0
     _desc = ""
     _caller = ""
-    
+
     def __init__(self, rc=0, message=None):
         """Initialization"""
         super(BaseError, self).__init__()
         self._rc = rc
         self._desc = message
         self._caller = inspect.stack()[1][3]
-      
+        
     @property
     def caller(self):
         return self._caller
@@ -30,7 +30,6 @@ class BaseError(Exception):
     
     def __repr__(self) -> str:
         return f"{self.caller}: {self.desc}: {self.rc}"
-    
     
 class languageNotValidError(BaseError):
     """Handles language invalid errors"""
