@@ -177,7 +177,10 @@ def get_a_language(lang_id: int=None) -> (dict, str):
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
-        lang_name = _db_manager.get_a_language(lang_id)
+        if _db_manager.get_a_language(lang_id) is None:
+            return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+        else:
+            lang_name = _db_manager.get_a_language(lang_id)
         logger.info(f"data succesfully fetched: {lang_id}: {lang_name}")
     return success_response(HTTPStatus.OK, lang_id, lang_name)
 
