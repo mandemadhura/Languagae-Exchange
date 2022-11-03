@@ -196,7 +196,7 @@ def get_languages() -> (dict, str):
     '''
     try:
         languages = []
-        logger.info(f"Received a request to fetch all language data")
+        logger.info(f"Received a request to fetch all languages")
         _db_manager = DatabaseManager()
         if _db_manager is not None:
             id_name_map = _db_manager.get_languages() or {}
