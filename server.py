@@ -201,7 +201,7 @@ def get_languages() -> (dict, str):
         if _db_manager is not None:
             id_name_map = _db_manager.get_languages() or {}
         if id_name_map:
-            logger.info(f"Fetched language data: {id_name_map}")
+            logger.info(f"Fetched languages: {id_name_map}")
             for id, name in id_name_map.items():
                 languages.append({'lang_id': id, 'lang_name': name})
         return success_response(HTTPStatus.OK, lang_obj=languages)
