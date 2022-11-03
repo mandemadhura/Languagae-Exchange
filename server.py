@@ -194,16 +194,19 @@ def get_languages() -> (dict, str):
         {error: <error_string>, "data": ''}
         status_code: int
     '''
-    languages = []
-    logger.info(f"Received a request to fetch all language data")
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        id_name_map = _db_manager.get_languages() or {}
-    if id_name_map:
-        logger.info(f"Fetched language data: {id_name_map}")
-        for id, name in id_name_map.items():
-            languages.append({'lang_id': id, 'lang_name': name})
-    return success_response(HTTPStatus.OK, lang_obj=languages)
+    try:
+        languages = []
+        logger.info(f"Received a request to fetch all language data")
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            id_name_map = _db_manager.get_languages() or {}
+        if id_name_map:
+            logger.info(f"Fetched language data: {id_name_map}")
+            for id, name in id_name_map.items():
+                languages.append({'lang_id': id, 'lang_name': name})
+        return success_response(HTTPStatus.OK, lang_obj=languages)
+    except:
+        error_response(status_code=500)
 
 
 if __name__ == '__main__':
