@@ -2,6 +2,7 @@
 
 import json
 from flask import jsonify
+from itertools import starmap
 from http import HTTPStatus
 from flask import Flask, request
 
@@ -200,6 +201,8 @@ def get_languages() -> (dict, str):
     '''
     try:
         languages = []
+        def sp(x,y):
+            languages.append({'lang_id': x, 'lang_name': y})
         lang_append = languages.append
         logger.info(f"Received a request to fetch all languages")
         _db_manager = DatabaseManager()
@@ -207,8 +210,7 @@ def get_languages() -> (dict, str):
             id_name_map = _db_manager.get_languages() or {}
         if id_name_map:
             logger.info(f"Fetched languages: {id_name_map}")
-            for id, name in id_name_map.items():
-                lang_append({'lang_id': id, 'lang_name': name})
+            list(starmap(sp, list(id_name_map.items())))
         return success_response(HTTPStatus.OK, lang_obj=languages)
     except:
         error_response(status_code=500)
