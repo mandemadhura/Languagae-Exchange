@@ -196,6 +196,7 @@ def get_languages() -> (dict, str):
     '''
     try:
         languages = []
+        lang_append = languages.append
         logger.info(f"Received a request to fetch all languages")
         _db_manager = DatabaseManager()
         if _db_manager is not None:
@@ -203,7 +204,7 @@ def get_languages() -> (dict, str):
         if id_name_map:
             logger.info(f"Fetched languages: {id_name_map}")
             for id, name in id_name_map.items():
-                languages.append({'lang_id': id, 'lang_name': name})
+                lang_append({'lang_id': id, 'lang_name': name})
         return success_response(HTTPStatus.OK, lang_obj=languages)
     except:
         error_response(status_code=500)
