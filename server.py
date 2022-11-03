@@ -1,6 +1,7 @@
 '''Server module responsible for entertaining the requests'''
 
 import json
+from flask import jsonify
 from http import HTTPStatus
 from flask import Flask, request
 
@@ -26,11 +27,11 @@ def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=No
         message: dict: A dictionary formed of success response with language details,
         status_code: HTTP staus code
     '''
-    message = {"error": '', "data": {"lang_id": lang_id}}
+    message = None
     if lang_name is not None:
-        message['data']['lang_name'] = lang_name
+        message = jsonify(error='', data=jsonify(lang_id=lang_id, lang_name=lang_name))
     if lang_obj is not None:
-        message['data'] = lang_obj
+        message = jsonify(error='', data=lang_obj)
     return message, status_code
 
 def error_response(error_string=None, status_code=None) -> (dict, str):
