@@ -1,6 +1,8 @@
 '''Server module responsible for entertaining the requests'''
 
 import json
+from flask import jsonify
+from itertools import starmap
 from http import HTTPStatus
 from flask import Flask, request
 
@@ -26,11 +28,11 @@ def success_response(status_code=None, lang_id=None, lang_name=None, lang_obj=No
         message: dict: A dictionary formed of success response with language details,
         status_code: HTTP staus code
     '''
-    message = {"error": '', "data": {"lang_id": lang_id}}
+    message = None
     if lang_name is not None:
-        message['data']['lang_name'] = lang_name
+        message = jsonify(error='', data=jsonify(lang_id=lang_id, lang_name=lang_name))
     if lang_obj is not None:
-        message['data'] = lang_obj
+        message = jsonify(error='', data=lang_obj)
     return message, status_code
 
 def error_response(error_string=None, status_code=None) -> (dict, str):
@@ -177,7 +179,10 @@ def get_a_language(lang_id: int=None) -> (dict, str):
         return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
     _db_manager = DatabaseManager()
     if _db_manager is not None:
-        lang_name = _db_manager.get_a_language(lang_id)
+        if _db_manager.get_a_language(lang_id) is None:
+            return error_response('Language does not exist', HTTPStatus.NOT_FOUND)
+        else:
+            lang_name = _db_manager.get_a_language(lang_id)
         logger.info(f"data succesfully fetched: {lang_id}: {lang_name}")
     return success_response(HTTPStatus.OK, lang_id, lang_name)
 
@@ -194,16 +199,21 @@ def get_languages() -> (dict, str):
         {error: <error_string>, "data": ''}
         status_code: int
     '''
-    languages = []
-    logger.info(f"Received a request to fetch all language data")
-    _db_manager = DatabaseManager()
-    if _db_manager is not None:
-        id_name_map = _db_manager.get_languages() or {}
-    if id_name_map:
-        logger.info(f"Fetched language data: {id_name_map}")
-        for id, name in id_name_map.items():
-            languages.append({'lang_id': id, 'lang_name': name})
-    return success_response(HTTPStatus.OK, lang_obj=languages)
+    try:
+        languages = []
+        def sp(x,y):
+            languages.append({'lang_id': x, 'lang_name': y})
+        lang_append = languages.append
+        logger.info(f"Received a request to fetch all languages")
+        _db_manager = DatabaseManager()
+        if _db_manager is not None:
+            id_name_map = _db_manager.get_languages() or {}
+        if id_name_map:
+            logger.info(f"Fetched languages: {id_name_map}")
+            list(starmap(sp, list(id_name_map.items())))
+        return success_response(HTTPStatus.OK, lang_obj=languages)
+    except:
+        error_response(status_code=500)
 
 
 if __name__ == '__main__':
